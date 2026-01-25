@@ -1,4 +1,4 @@
-import type { ReadableAtom } from 'nanostores'
+import type { ReadonlySignal } from '@preact/signals-core'
 
 type AutodetectOpts<Locales extends readonly string[]> =
   Extract<Locales[number], 'en'> extends never
@@ -29,4 +29,4 @@ type AutodetectOpts<Locales extends readonly string[]> =
  */
 export function browser<const Locales extends readonly string[]>(
   opts: AutodetectOpts<Locales>
-): ReadableAtom<Locales[number]>
+): ReadonlySignal<Locales[number]>

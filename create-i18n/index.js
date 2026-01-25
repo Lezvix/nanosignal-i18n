@@ -1,4 +1,4 @@
-import { atom, onMount } from 'nanostores'
+import { signal } from '@preact/signals-core'
 
 export function createI18n(locale, opts) {
   let baseLocale = opts.baseLocale || 'en'
@@ -19,7 +19,7 @@ export function createI18n(locale, opts) {
       }
     }
     if (newComponents.length === 0) return
-    define.loading.set(true)
+    define.loading.value = true
 
     for (let prefix of newPrefixes) requested.add(prefix)
     let translations = await opts.get(code, newComponents)
@@ -37,9 +37,9 @@ export function createI18n(locale, opts) {
       requested.delete(prefix)
     }
 
-    if (code === locale.get() && requested.size === 0) {
+    if (code === locale.peek() && requested.size === 0) {
       rerenders.forEach(rerender => rerender(code))
-      define.loading.set(false)
+      define.loading.value = false
     }
   }
 
@@ -59,27 +59,30 @@ export function createI18n(locale, opts) {
       baseTranslation = i(baseTranslation)
     }
 
-    let t = atom()
-    if (process.env.NODE_ENV !== 'production') {
-      t.component = componentName
-      t.base = base
-      if (define.cache[baseLocale][componentName]) {
-        let isHMR = import.meta && (import.meta.hot || import.meta.webpackHot)
-        if (isHMR) {
-          /* c8 ignore next 3 */
-          for (let i in define.cache) {
-            delete define.cache[i][componentName]
-          }
-        } else if (!opts.isSSR) {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `I18n component ${componentName} was defined multiple times. ` +
-              'It could lead to cache issues. Try to move i18n definition ' +
-              'from component’s render function.'
-          )
+    let t = signal(undefined, {
+      watched: () => {
+        mounted.push(componentName)
+        let code = locale.peek()
+        let isCached =
+          code === baseLocale ||
+          (define.cache[code] && define.cache[code][componentName])
+        if (isCached) {
+          setTranslation(code)
+        } else {
+          getTranslation(code, [componentName])
         }
+        for (let i in processors) {
+          processors[i].from.subscribe(() => {
+            setTranslation(code)
+          })
+        }
+        rerenders.add(setTranslation)
+      },
+      unwatched: () => {
+        mounted = mounted.filter(i => i !== componentName)
+        rerenders.delete(setTranslation)
       }
-    }
+    })
 
     define.cache[baseLocale][componentName] = baseTranslation
 
@@ -93,37 +96,15 @@ export function createI18n(locale, opts) {
         let input = translations[i]
         translations[i] = (...args) => nodeTransform(code, input, args)
       }
-      t.set(translations)
+      t.value = translations
     }
 
-    if (locale.get() !== baseLocale && define.cache[locale.get()]) {
-      setTranslation(locale.get())
+    if (locale.peek() !== baseLocale && define.cache[locale.peek()]) {
+      setTranslation(locale.peek())
     } else {
       setTranslation(baseLocale)
     }
 
-    onMount(t, () => {
-      mounted.push(componentName)
-      let code = locale.get()
-      let isCached =
-        code === baseLocale ||
-        (define.cache[code] && define.cache[code][componentName])
-      if (isCached) {
-        setTranslation(code)
-      } else {
-        getTranslation(code, [componentName])
-      }
-      for (let i in processors) {
-        processors[i].from.listen(() => {
-          setTranslation(code)
-        })
-      }
-      rerenders.add(setTranslation)
-      return () => {
-        mounted = mounted.filter(i => i !== componentName)
-        rerenders.delete(setTranslation)
-      }
-    })
     return t
   }
 
@@ -131,7 +112,7 @@ export function createI18n(locale, opts) {
     ...opts.cache,
     [baseLocale]: {}
   }
-  define.loading = atom(false)
+  define.loading = signal(false)
 
   locale.subscribe(code => {
     requested.clear()
@@ -142,7 +123,7 @@ export function createI18n(locale, opts) {
       getTranslation(code, nonCached)
     } else {
       rerenders.forEach(rerender => rerender(code))
-      define.loading.set(false)
+      define.loading.value = false
     }
   })
 

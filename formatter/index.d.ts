@@ -1,4 +1,4 @@
-import type { ReadableAtom } from 'nanostores'
+import type { ReadonlySignal } from '@preact/signals-core'
 
 import type { LocaleStore } from '../locale-from/index.js'
 
@@ -27,15 +27,14 @@ export interface Formatter {
  * ```
  *
  * ```js
- * import { useStore } from 'nanostores'
  * import { format } from '../stores/i18n.js'
  *
  * export let Date = (date) => {
- *   let { time } = useStore(format)
+ *   let { time } = format.value
  *   return time(date)
  * }
  * ```
  *
  * @param locale
  */
-export function formatter(locale: LocaleStore): ReadableAtom<Formatter>
+export function formatter(locale: LocaleStore): ReadonlySignal<Formatter>

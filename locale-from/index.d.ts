@@ -1,6 +1,6 @@
-import type { Atom, ReadableAtom } from 'nanostores'
+import type { Signal, ReadonlySignal } from '@preact/signals-core'
 
-export type LocaleStore<Locale extends string = string> = ReadableAtom<Locale>
+export type LocaleStore<Locale extends string = string> = ReadonlySignal<Locale>
 
 /**
  * Choose the first available locale from difference sources. Like use locale
@@ -8,9 +8,9 @@ export type LocaleStore<Locale extends string = string> = ReadableAtom<Locale>
  *
  * ```ts
  * import { localeFrom, browser } from '@nanostores/i18n'
- * import { persistentAtom } from '@nanostores/persistent'
+ * import { signal } from '@preact/signals-core'
  *
- * export const localeSettings = persistentAtom<'ru' | 'en' | undefined>()
+ * export const localeSettings = signal<'ru' | 'en' | undefined>(undefined)
  *
  * export const locale = localeFrom(
  *   localeSettings,
@@ -22,5 +22,5 @@ export type LocaleStore<Locale extends string = string> = ReadableAtom<Locale>
  * @returns Store with the first non-`undefined` value from input stores
  */
 export function localeFrom<Locale extends string>(
-  ...stores: [...Atom<Locale | undefined>[], Atom<Locale>]
+  ...stores: [...Signal<Locale | undefined>[], Signal<Locale>]
 ): LocaleStore<Locale>

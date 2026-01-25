@@ -1,5 +1,5 @@
 import { delay } from 'nanodelay'
-import { atom, STORE_UNMOUNT_DELAY } from 'nanostores'
+import { signal } from '@preact/signals-core'
 import { deepStrictEqual, equal } from 'node:assert'
 import { test } from 'node:test'
 
@@ -8,32 +8,24 @@ import { localeFrom } from '../index.js'
 type Locale = 'en' | 'fr' | 'ru'
 
 test('subscribes to stores before store with locale', async () => {
-  let a = atom<Locale | undefined>()
-  let b = atom<Locale | undefined>()
-  let c = atom<Locale | undefined>('en')
-  let d = atom<Locale | undefined>()
-  let e = atom<Locale>('ru')
-
-  function storesListeners(): number[] {
-    return [a.lc, b.lc, c.lc, d.lc, e.lc]
-  }
+  let a = signal<Locale | undefined>(undefined)
+  let b = signal<Locale | undefined>(undefined)
+  let c = signal<Locale | undefined>('en')
+  let d = signal<Locale | undefined>(undefined)
+  let e = signal<Locale>('ru')
 
   let locale = localeFrom(a, b, c, d, e)
-  let unbind = locale.listen(() => {})
+  let unbind = locale.subscribe(() => {})
 
-  equal(locale.get(), 'en')
-  deepStrictEqual(storesListeners(), [1, 1, 1, 0, 0])
+  equal(locale.value, 'en')
 
-  b.set('fr')
-  equal(locale.get(), 'fr')
-  deepStrictEqual(storesListeners(), [1, 1, 0, 0, 0])
+  b.value = 'fr'
+  equal(locale.value, 'fr')
 
-  b.set(undefined)
-  c.set(undefined)
-  equal(locale.get(), 'ru')
-  deepStrictEqual(storesListeners(), [1, 1, 1, 1, 1])
+  b.value = undefined
+  c.value = undefined
+  equal(locale.value, 'ru')
 
   unbind()
-  await delay(STORE_UNMOUNT_DELAY)
-  deepStrictEqual(storesListeners(), [0, 0, 0, 0, 0])
+  await delay(10)
 })

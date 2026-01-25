@@ -1,4 +1,4 @@
-import { atom } from 'nanostores'
+import { signal } from '@preact/signals-core'
 import { equal } from 'node:assert'
 import { test } from 'node:test'
 import { setTimeout } from 'node:timers/promises'
@@ -6,7 +6,7 @@ import { setTimeout } from 'node:timers/promises'
 import { count, createI18n, eachMessage } from '../index.js'
 
 test('has global transform', async () => {
-  let locale = atom('en')
+  let locale = signal('en')
 
   let i18n = createI18n(locale, {
     get() {
@@ -33,11 +33,11 @@ test('has global transform', async () => {
   })
 
   messages.subscribe(() => {})
-  equal(messages.get().title, 'GAMEs')
-  equal(messages.get().items(1), '1 GAME')
+  equal(messages.value.title, 'GAMEs')
+  equal(messages.value.items(1), '1 GAME')
 
-  locale.set('ru')
+  locale.value = 'ru'
   await setTimeout(10)
-  equal(messages.get().title, 'ИГРы')
-  equal(messages.get().items(1), '1 ИГРа')
+  equal(messages.value.title, 'ИГРы')
+  equal(messages.value.items(1), '1 ИГРа')
 })

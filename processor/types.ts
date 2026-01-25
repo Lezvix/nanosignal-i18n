@@ -1,9 +1,9 @@
-import { atom } from 'nanostores'
+import { signal } from '@preact/signals-core'
 
 import { createI18n, createProcessor } from '../index.js'
 
-let locale = atom('en')
-let sizeStore = atom<'big' | 'small'>('big')
+let locale = signal('en')
+let sizeStore = signal<'big' | 'small'>('big')
 let size = createProcessor(sizeStore)
 
 let i18n = createI18n(locale, {
@@ -20,4 +20,4 @@ let t = i18n('component', {
   })
 })
 
-console.log(t.get().title)
+console.log(t.value.title)

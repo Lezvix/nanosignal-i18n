@@ -10,7 +10,7 @@ let title = document.querySelector('h1')
 let desc = document.querySelector('span')
 
 messages.subscribe(t => {
-  let { relativeTime, time } = format.get()
+  let { relativeTime, time } = format.peek()
   title.innerText = t.title
   desc.innerText = t.desc({
     date: time(new Date(), {

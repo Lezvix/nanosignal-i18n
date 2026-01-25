@@ -11,7 +11,7 @@ locale.subscribe(code => {
 })
 
 changeLocale.addEventListener('change', () => {
-  localeSetting.set(changeLocale.value)
+  localeSetting.value = changeLocale.value
 })
 
 clearLocale.addEventListener('click', () => {

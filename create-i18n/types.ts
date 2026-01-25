@@ -24,7 +24,7 @@ let i18n1 = createI18n(locale, {
 let messages1 = i18n1('post', {
   title: 'Заголовок'
 })
-console.log(messages1.get().title)
+console.log(messages1.value.title)
 
 let i18n2 = createI18n(locale, {
   get() {
@@ -45,7 +45,7 @@ let messages2 = i18n2('post', {
   }),
   title: params('Title: {name}')
 })
-let t = messages2.get()
+let t = messages2.value
 testString(t.title({ name: 'Post' }))
 testString(t.posts(5))
 testString(t.pages({ category: 10 })(5))

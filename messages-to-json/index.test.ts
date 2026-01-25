@@ -1,11 +1,11 @@
-import { atom } from 'nanostores'
+import { signal } from '@preact/signals-core'
 import { deepStrictEqual } from 'node:assert'
 import { test } from 'node:test'
 
 import { count, createI18n, messagesToJSON, params } from '../index.js'
 
 test('converts base translations to JSON', () => {
-  let locale = atom('en')
+  let locale = signal('en')
   let i18n = createI18n(locale, {
     get() {
       return Promise.resolve({})

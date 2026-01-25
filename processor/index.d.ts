@@ -1,4 +1,4 @@
-import type { ReadableAtom } from 'nanostores'
+import type { ReadonlySignal } from '@preact/signals-core'
 
 import type {
   TranslationFunction,
@@ -6,7 +6,7 @@ import type {
 } from '../create-i18n/index.js'
 
 export interface Processor<Key extends string = string> {
-  from: ReadableAtom<Key>
+  from: ReadonlySignal<Key>
   <Input extends Record<Key, TranslationJSON>>(
     input: Input
   ): TranslationFunction<[], Input[keyof Input]>
@@ -18,10 +18,10 @@ export interface Processor<Key extends string = string> {
  *
  * ```ts
  * import { createProcessor, createI18n } from '@nanostores/i18n'
- * import { atom } from "@nanostores"
+ * import { signal } from '@preact/signals-core'
  * import { i18n } from '../stores/i18n'
  *
- * const sizeStore = useAtom('big')
+ * const sizeStore = signal('big')
  * export const size = createProcessor(sizeStore)
  * export const i18n = createI18n(locale, {
  *  get: async () => ({}),
@@ -42,9 +42,9 @@ export interface Processor<Key extends string = string> {
  * t.title()
  * ```
  *
- * @param source Store for listen.
+ * @param source Signal to listen to.
  * @returns The processor object.
  */
 export function createProcessor<Key extends string>(
-  source: ReadableAtom<Key>
+  source: ReadonlySignal<Key>
 ): Processor<Key>

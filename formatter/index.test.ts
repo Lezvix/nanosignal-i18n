@@ -1,15 +1,14 @@
-import type { StoreValue } from 'nanostores'
-import { atom } from 'nanostores'
+import { signal } from '@preact/signals-core'
 import { equal } from 'node:assert'
 import { test } from 'node:test'
 
 import { formatter } from '../index.js'
 
 test('has number, date and relative time formatters', () => {
-  let locale = atom('en')
+  let locale = signal('en')
   let format = formatter(locale)
 
-  let f: StoreValue<typeof format> | undefined
+  let f: (typeof format)['value'] | undefined
   format.subscribe(value => {
     f = value
   })
@@ -22,7 +21,7 @@ test('has number, date and relative time formatters', () => {
   equal(f.relativeTime(-1, 'day'), '1 day ago')
   equal(f.relativeTime(-1, 'day', { numeric: 'auto' }), 'yesterday')
 
-  locale.set('ru')
+  locale.value = 'ru'
   equal(f.number(10000), '10 000')
   equal(f.time(new Date(86400000)), '02.01.1970')
   equal(f.relativeTime(-1, 'day'), '1 день назад')

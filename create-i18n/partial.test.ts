@@ -1,5 +1,5 @@
 import { delay } from 'nanodelay'
-import { atom, STORE_UNMOUNT_DELAY } from 'nanostores'
+import { signal } from '@preact/signals-core'
 import { deepStrictEqual, equal } from 'node:assert'
 import { afterEach, test } from 'node:test'
 
@@ -34,7 +34,7 @@ afterEach(() => {
   getCalls = []
 })
 
-let locale = atom<'de' | 'en' | 'fr' | 'ru'>('ru')
+let locale = signal<'de' | 'en' | 'fr' | 'ru'>('ru')
 let i18n = createI18n(locale, { get })
 let events: string[] = []
 
@@ -50,7 +50,7 @@ let headingUnbind: () => void
 let commentUnbind: () => void
 
 test("after mount shouldn't load translations with same prefix", () => {
-  equal(i18n.loading.get(), false)
+  equal(i18n.loading.value, false)
   deepStrictEqual(getCalls, [])
 
   postUnbind = post.subscribe(t => {
@@ -59,7 +59,7 @@ test("after mount shouldn't load translations with same prefix", () => {
   headingUnbind = heading.subscribe(t => {
     events.push(t.title)
   })
-  equal(i18n.loading.get(), true)
+  equal(i18n.loading.value, true)
   deepStrictEqual(getCalls, [{ ru: ['main/post'] }])
   deepStrictEqual(events, ['Post', 'Title'])
 })
@@ -72,13 +72,13 @@ test('loads translations partial', async () => {
       'main/post': { title: 'Публикация' }
     }
   ])
-  equal(i18n.loading.get(), false)
+  equal(i18n.loading.value, false)
   deepStrictEqual(events, ['Post', 'Title', 'Публикация', 'Заголовок'])
-  deepStrictEqual(post.get(), { title: 'Публикация' })
-  deepStrictEqual(heading.get(), { title: 'Заголовок' })
-  deepStrictEqual(comment.get(), { title: 'Комментарий' })
+  deepStrictEqual(post.value, { title: 'Публикация' })
+  deepStrictEqual(heading.value, { title: 'Заголовок' })
+  deepStrictEqual(comment.value, { title: 'Комментарий' })
 
-  equal(i18n.loading.get(), false)
+  equal(i18n.loading.value, false)
   deepStrictEqual(getCalls, [])
 })
 
@@ -90,7 +90,7 @@ test('after mount should load translations with different prefix', async () => {
   let gamesUnbind = games.subscribe(t => {
     events.push(t.title)
   })
-  equal(i18n.loading.get(), true)
+  equal(i18n.loading.value, true)
   deepStrictEqual(getCalls, [{ ru: ['settings/user'] }, { ru: ['games'] }])
   deepStrictEqual(events, ['User', 'Games'])
 
@@ -102,7 +102,7 @@ test('after mount should load translations with different prefix', async () => {
       games: { title: 'Игры' }
     }
   ])
-  equal(i18n.loading.get(), false)
+  equal(i18n.loading.value, false)
   deepStrictEqual(events, [
     'User',
     'Games',
@@ -120,7 +120,7 @@ test("component mounting shouldn't load cached translations", () => {
   commentUnbind = comment.subscribe(t => {
     events.push(t.title)
   })
-  equal(i18n.loading.get(), false)
+  equal(i18n.loading.value, false)
   deepStrictEqual(getCalls, [])
   deepStrictEqual(events, ['Комментарий'])
 })
@@ -130,7 +130,7 @@ test('loads translation after component mounted', async () => {
   message.subscribe(t => {
     events.push(t.title)
   })
-  equal(i18n.loading.get(), true)
+  equal(i18n.loading.value, true)
   deepStrictEqual(getCalls, [{ ru: ['chat/message'] }])
   deepStrictEqual(events, ['Message'])
 
@@ -139,7 +139,7 @@ test('loads translation after component mounted', async () => {
       'chat/message': { title: 'Сообщение' }
     }
   ])
-  equal(i18n.loading.get(), false)
+  equal(i18n.loading.value, false)
   deepStrictEqual(events, [
     'Message',
     'Публикация',
@@ -147,13 +147,13 @@ test('loads translation after component mounted', async () => {
     'Комментарий',
     'Сообщение'
   ])
-  deepStrictEqual(message.get(), { title: 'Сообщение' })
+  deepStrictEqual(message.value, { title: 'Сообщение' })
 })
 
 test("locale changing shouldn't load cached translations", () => {
   events = []
-  locale.set('en')
-  equal(i18n.loading.get(), false)
+  locale.value = 'en'
+  equal(i18n.loading.value, false)
   deepStrictEqual(getCalls, [])
   deepStrictEqual(events, ['Post', 'Title', 'Comment', 'Message'])
 })
@@ -164,10 +164,10 @@ test('locale changing should load translations for mounted only', async () => {
   headingUnbind()
   commentUnbind()
 
-  await delay(STORE_UNMOUNT_DELAY)
+  await delay(10)
 
-  locale.set('fr')
-  equal(i18n.loading.get(), true)
+  locale.value = 'fr'
+  equal(i18n.loading.value, true)
   deepStrictEqual(getCalls, [{ fr: ['chat/message'] }])
   deepStrictEqual(events, [])
 
@@ -176,17 +176,17 @@ test('locale changing should load translations for mounted only', async () => {
       'chat/message': { title: 'Le message' }
     }
   ])
-  equal(i18n.loading.get(), false)
+  equal(i18n.loading.value, false)
   deepStrictEqual(events, ['Le message'])
-  deepStrictEqual(post.get(), { title: 'Post' })
-  deepStrictEqual(heading.get(), { title: 'Title' })
-  deepStrictEqual(comment.get(), { title: 'Comment' })
-  deepStrictEqual(message.get(), { title: 'Le message' })
+  deepStrictEqual(post.value, { title: 'Post' })
+  deepStrictEqual(heading.value, { title: 'Title' })
+  deepStrictEqual(comment.value, { title: 'Comment' })
+  deepStrictEqual(message.value, { title: 'Le message' })
 })
 
 test('if get returns array, it transforms to object', async () => {
   events = []
-  locale.set('en')
+  locale.value = 'en'
 
   post.subscribe(t => {
     events.push(t.title)
@@ -198,8 +198,8 @@ test('if get returns array, it transforms to object', async () => {
     events.push(t.title)
   })
 
-  locale.set('de')
-  equal(i18n.loading.get(), true)
+  locale.value = 'de'
+  equal(i18n.loading.value, true)
   deepStrictEqual(getCalls, [
     { de: ['chat/message', 'main/post', 'main/heading', 'main/comment'] }
   ])
@@ -221,7 +221,7 @@ test('if get returns array, it transforms to object', async () => {
     'main/heading': { title: 'Titel' },
     'main/post': { title: 'Publikation' }
   })
-  equal(i18n.loading.get(), false)
+  equal(i18n.loading.value, false)
   deepStrictEqual(events, [
     'Message',
     'Post',

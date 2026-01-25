@@ -1,5 +1,5 @@
 import { delay } from 'nanodelay'
-import { atom } from 'nanostores'
+import { signal } from '@preact/signals-core'
 import { equal } from 'node:assert'
 import { test } from 'node:test'
 
@@ -7,7 +7,7 @@ import { createI18n, translationsLoading } from '../index.js'
 import type { ComponentsJSON } from '../index.js'
 
 test('waits for translation loading', async () => {
-  let locale = atom('en')
+  let locale = signal('en')
   let finish = (): void => {}
   let i18n = createI18n(locale, {
     get(): Promise<ComponentsJSON> {
@@ -27,11 +27,11 @@ test('waits for translation loading', async () => {
     title: ''
   })
 
-  messages.listen(() => {})
+  messages.subscribe(() => {})
   await translationsLoading(i18n)
 
   let finished = false
-  locale.set('fr')
+  locale.value = 'fr'
   translationsLoading(i18n).then(() => {
     finished = true
   })

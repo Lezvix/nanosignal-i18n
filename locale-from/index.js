@@ -1,18 +1,29 @@
-import { atom, onMount } from 'nanostores'
+import { signal } from '@preact/signals-core'
 
 export function localeFrom(...stores) {
-  let store = atom()
-
   let unbinds = Array(stores.length)
+
+  let store = signal(undefined, {
+    watched: listener,
+    unwatched: () => {
+      for (let unbind of unbinds) unbind()
+      unbinds = Array(stores.length)
+    }
+  })
+
   function listener() {
     let i
     for (i = 0; i < stores.length; i++) {
-      let locale = stores[i].get()
+      let locale = stores[i].peek()
       if (!unbinds[i]) {
-        unbinds[i] = stores[i].listen(listener)
+        let init = false
+        unbinds[i] = stores[i].subscribe(() => {
+          if (!init) return init = true;
+          listener()
+        })
       }
       if (locale) {
-        store.set(locale)
+        store.value = locale
         for (let j = i + 1; j < stores.length; j++) {
           if (!unbinds[j]) break
           unbinds[j]()
@@ -22,14 +33,6 @@ export function localeFrom(...stores) {
       }
     }
   }
-
-  onMount(store, () => {
-    listener()
-    return () => {
-      for (let unbind of unbinds) unbind()
-      unbinds = Array(stores.length)
-    }
-  })
 
   return store
 }

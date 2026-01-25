@@ -1,4 +1,4 @@
-import type { ReadableAtom } from 'nanostores'
+import type { ReadonlySignal } from '@preact/signals-core'
 
 import type { LocaleStore } from '../locale-from/index.js'
 import type { Processor } from '../processor/index.js'
@@ -38,11 +38,11 @@ export interface Components {
 }
 
 export type Messages<Body extends Translations = Translations> =
-  ReadableAtom<Body>
+  ReadonlySignal<Body>
 
 export interface I18n<Locale extends string = string> {
   cache: Record<Locale, Translations>
-  loading: ReadableAtom<boolean>
+  loading: ReadonlySignal<boolean>
 
   <Body extends Translations>(
     componentName: string,

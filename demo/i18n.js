@@ -1,8 +1,7 @@
-import { persistentAtom } from '@nanostores/persistent'
-
 import { browser, createI18n, formatter, localeFrom } from '../index.js'
+import { effect, signal } from '@preact/signals-core'
 
-export let localeSetting = persistentAtom('locale')
+export let localeSetting = signal(undefined);
 
 export let locale = localeFrom(
   localeSetting,

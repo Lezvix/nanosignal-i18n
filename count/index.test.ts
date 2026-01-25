@@ -1,4 +1,4 @@
-import { atom } from 'nanostores'
+import { signal } from '@preact/signals-core'
 import { equal } from 'node:assert'
 import { test } from 'node:test'
 
@@ -18,7 +18,7 @@ function getResponse(translations: ComponentsJSON): Promise<void> {
   return Promise.resolve()
 }
 
-let locale = atom('ru')
+let locale = signal('ru')
 let i18n = createI18n(locale, { get })
 
 test('uses pluralization rules', async () => {
@@ -47,11 +47,11 @@ test('uses pluralization rules', async () => {
     }
   })
 
-  equal(messages.get().robots(1), '1 робот')
-  equal(messages.get().robots(21), '21 робот')
-  equal(messages.get().robots(2), '2 робота')
-  equal(messages.get().robots(5), '5 роботов')
+  equal(messages.value.robots(1), '1 робот')
+  equal(messages.value.robots(21), '21 робот')
+  equal(messages.value.robots(2), '2 робота')
+  equal(messages.value.robots(5), '5 роботов')
 
-  equal(messages.get().onlyMany(1), 'много')
-  equal(messages.get().onlyMany(2), 'много')
+  equal(messages.value.onlyMany(1), 'много')
+  equal(messages.value.onlyMany(2), 'много')
 })

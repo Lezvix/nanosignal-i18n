@@ -4,7 +4,7 @@ export function createProcessor(source) {
   let processor = transform((locale, translation) => {
     return strings(translation, str => {
       return str
-    })[source.get()]
+    })[source.peek()]
   })
   processor.from = source
   return processor
