@@ -23,7 +23,10 @@
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
-  "repository": "Lezvix/nanosignal-i18n",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lezvix/nanosignal-i18n.git"
+  },
   "sideEffects": false,
   "type": "module",
   "types": "./index.d.ts",
