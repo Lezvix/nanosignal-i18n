@@ -82,7 +82,28 @@ export function createI18n(locale, opts) {
         mounted = mounted.filter(i => i !== componentName)
         rerenders.delete(setTranslation)
       }
-    })
+    });
+    
+    if (process.env.NODE_ENV !== 'production') {
+      t.component = componentName
+      t.base = base
+      if (define.cache[baseLocale][componentName]) {
+        let isHMR = import.meta && (import.meta.hot || import.meta.webpackHot)
+        if (isHMR) {
+          /* c8 ignore next 3 */
+          for (let i in define.cache) {
+            delete define.cache[i][componentName]
+          }
+        } else if (!opts.isSSR) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `I18n component ${componentName} was defined multiple times. ` +
+              'It could lead to cache issues. Try to move i18n definition ' +
+              'from component’s render function.'
+          )
+        }
+      }
+    }
 
     define.cache[baseLocale][componentName] = baseTranslation
 
